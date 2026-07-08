@@ -2,6 +2,33 @@ spring:
   application:
     name: Trust Assessment Engine Backend
   datasource:
+    url: jdbc:h2:mem:trustengine
+    driverClassName: org.h2.Driver
+    username: sa
+    password: 
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
+  h2:
+    console:
+      enabled: true
+
+server:
+  port: 8080
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
     url: jdbc:postgresql://localhost:5432/trust_engine
     username: postgres
     password: postgres
@@ -9,14 +36,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
     properties:
       hibernate:
-        format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     enabled: true
     baseline-on-migrate: true
-
-server:
-  port: 8080
