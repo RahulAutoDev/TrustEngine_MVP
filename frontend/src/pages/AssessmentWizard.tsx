@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Check, ChevronRight, CheckCircle2, Shield, Settings2, ShieldCheck, PlayCircle, Edit2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { assessmentService } from '@/services/assessmentService';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -45,6 +45,7 @@ const STEPS = [
 export function AssessmentWizard() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const form = useForm<WizardData>({
     resolver: zodResolver(wizardSchema),
@@ -94,12 +95,12 @@ export function AssessmentWizard() {
         scope: `${data.businessUnit} - ${data.environment} - ${data.riskCategory}`,
       });
       localStorage.setItem('currentAssessmentId', response.assessmentId);
-      setCurrentStep(5);
+      navigate('/assessment-questions');
     } catch (error) {
       console.error("Failed to create assessment, falling back to Demo Mode", error);
       // Fallback to Demo Mode
       localStorage.setItem('currentAssessmentId', 'DEMO-' + Math.floor(Math.random() * 10000));
-      setCurrentStep(5);
+      navigate('/assessment-questions');
     } finally {
       setIsSubmitting(false);
     }
