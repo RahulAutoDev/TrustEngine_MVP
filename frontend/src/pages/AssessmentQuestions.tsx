@@ -128,6 +128,15 @@ export function AssessmentQuestions() {
   }
 
   const currentCategory = categories[currentCategoryIndex];
+
+  if (!currentCategory) {
+      return (
+          <div className="min-h-screen flex items-center justify-center">
+              Loading assessment...
+          </div>
+      );
+  }
+
   const totalQuestions = categories.reduce((acc, cat) => acc + cat.questions.length, 0);
   const answeredCount = Object.keys(answers).length;
   const progressPercentage = Math.round((answeredCount / totalQuestions) * 100);
