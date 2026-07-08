@@ -31,6 +31,7 @@ export function AssessmentQuestions() {
   const [categories, setCategories] = useState<any[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [analyzingStage, setAnalyzingStage] = useState(-1);
+  const [isLoading, setIsLoading] = useState(true);
 
   const isDemo = new URLSearchParams(location.search).get('demo') === 'true';
 
@@ -55,6 +56,9 @@ export function AssessmentQuestions() {
         return acc;
       }, {});
       setCategories(Object.values(grouped));
+      setIsLoading(false);
+    }).catch(() => {
+      setIsLoading(false);
     });
   }, [isDemo]);
 
@@ -123,8 +127,20 @@ export function AssessmentQuestions() {
     );
   }
 
-  if (categories.length === 0) {
+  if (isLoading) {
     return <div className="min-h-[calc(100vh-14rem)] bg-slate-50 flex items-center justify-center">Loading questions...</div>;
+  }
+
+  if (categories.length === 0) {
+    return (
+      <div className="min-h-[calc(100vh-14rem)] bg-slate-50 flex items-center justify-center">
+        <div className="text-center p-8 bg-white rounded-2xl shadow-sm border border-slate-200">
+          <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-slate-900 mb-2">No Assessment Data</h3>
+          <p className="text-slate-500">No assessment questions are available.</p>
+        </div>
+      </div>
+    );
   }
 
   const currentCategory = categories[currentCategoryIndex];
