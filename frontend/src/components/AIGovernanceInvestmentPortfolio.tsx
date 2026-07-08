@@ -3,6 +3,10 @@ import { motion } from 'framer-motion';
 import { Briefcase, Target, Download, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from '@/components/ui/dialog';
+import { AIGovernanceCertificate } from '@/components/AIGovernanceCertificate';
+import { exportToCSV } from '@/lib/exportUtils';
+import { exportMasterReport } from '@/lib/reportBuilder';
 
 import { investmentService, type PortfolioData } from '@/services/investmentService';
 import { PortfolioExecutiveSummary } from './PortfolioExecutiveSummary';
@@ -13,6 +17,8 @@ import { PortfolioImplementationRoadmap } from './PortfolioImplementationRoadmap
 
 export function AIGovernanceInvestmentPortfolio({ trustScore }: { trustScore: number }) {
   const [data, setData] = useState<PortfolioData | null>(null);
+
+  const [isCertificateOpen, setIsCertificateOpen] = useState(false);
 
   useEffect(() => {
     investmentService.getPortfolioData(trustScore).then(setData);
@@ -29,6 +35,26 @@ export function AIGovernanceInvestmentPortfolio({ trustScore }: { trustScore: nu
     hidden: { y: 20, opacity: 0 },
     visible: { y: 0, opacity: 1 }
   };
+
+
+  const handleExportCSV = () => {
+    if (!data) return;
+    const csvData = data.investments.map(inv => ({
+      'ID': inv.id,
+      'Investment Name': inv.title,
+      'Category': inv.category,
+      'Business Value': inv.businessValue,
+      'Estimated Cost': inv.estimatedCost,
+      'Timeline': inv.timeline,
+      'ROI Score': inv.roiScore,
+      'Priority': inv.priority,
+      'Trust Score Gain': inv.trustScoreGain
+    }));
+    exportToCSV('Detailed_ROI_Analysis.csv', csvData);
+  };
+
+  const orgName = localStorage.getItem('currentOrgName') || localStorage.getItem('demoOrgName') || 'Acme Corp';
+  const sysName = localStorage.getItem('currentSystemName') || localStorage.getItem('demoSystemName') || 'Customer Support LLM';
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="pt-16 pb-12">
@@ -48,6 +74,7 @@ export function AIGovernanceInvestmentPortfolio({ trustScore }: { trustScore: nu
       </div>
 
       {/* Top Level Portfolio KPIs */}
+      <div id="board-deck-content">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div className="bg-slate-900 text-white rounded-xl p-5 text-center shadow-sm">
           <span className="text-[10px] uppercase font-bold text-slate-400 mb-1 block">Current Trust Score</span>
@@ -106,16 +133,38 @@ export function AIGovernanceInvestmentPortfolio({ trustScore }: { trustScore: nu
           </motion.div>
         </div>
       </div>
+      </div>
 
       {/* Action Buttons */}
       <motion.div variants={itemVariants} className="pt-8 border-t border-slate-200 flex flex-col md:flex-row items-center justify-center gap-4">
-         <Button size="lg" className="rounded-full bg-emerald-600 hover:bg-emerald-700 text-white w-full sm:w-auto shadow-xl px-8 h-14">
-           <Briefcase className="w-5 h-5 mr-2" /> Approve Investment Portfolio
-         </Button>
-         <Button size="lg" className="rounded-full bg-slate-900 hover:bg-slate-800 text-white w-full sm:w-auto shadow-xl px-8 h-14">
+         <Dialog open={isCertificateOpen} onOpenChange={setIsCertificateOpen}>
+           <DialogTrigger asChild>
+             <Button size="lg" className="rounded-full bg-emerald-600 hover:bg-emerald-700 text-white w-full sm:w-auto shadow-xl px-8 h-14">
+               <Briefcase className="w-5 h-5 mr-2" /> Approve Investment Portfolio
+             </Button>
+           </DialogTrigger>
+           <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto bg-slate-50">
+             <DialogTitle className="sr-only">Investment Approval Certificate</DialogTitle>
+             <div className="p-2 sm:p-6">
+               <AIGovernanceCertificate 
+                 trustScore={data.projectedScore} 
+                 organizationName={orgName} 
+                 aiSystemName={sysName}
+               />
+             </div>
+           </DialogContent>
+         </Dialog>
+
+         <Button 
+           onClick={() => exportMasterReport('Board_Deck_Export.pdf')}
+           size="lg" className="rounded-full bg-slate-900 hover:bg-slate-800 text-white w-full sm:w-auto shadow-xl px-8 h-14"
+         >
            <Download className="w-5 h-5 mr-2" /> Export to Board Deck
          </Button>
-         <Button variant="outline" size="lg" className="rounded-full w-full sm:w-auto border-slate-300 font-bold text-slate-600 px-8 h-14">
+         <Button 
+           onClick={handleExportCSV}
+           variant="outline" size="lg" className="rounded-full w-full sm:w-auto border-slate-300 font-bold text-slate-600 px-8 h-14"
+         >
            <FileText className="w-5 h-5 mr-2" /> Detailed ROI Analysis
          </Button>
       </motion.div>

@@ -13,8 +13,7 @@ import {
   ScatterChart, Scatter, ZAxis
 } from 'recharts';
 import { motion } from 'framer-motion';
-// @ts-ignore
-import html2pdf from 'html2pdf.js';
+import { exportMasterReport } from '@/lib/reportBuilder';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -146,16 +145,7 @@ export function AssessmentResults() {
   }));
 
   const handleExportPDF = () => {
-    const element = document.getElementById('report-content');
-    if (!element) return;
-    const opt = {
-      margin:       0.5,
-      filename:     'AI_Governance_Report.pdf',
-      image:        { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
-      jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' as const }
-    };
-    html2pdf().set(opt).from(element).save();
+    exportMasterReport('Trust_Assessment_Results.pdf');
   };
 
   const containerVariants = {
