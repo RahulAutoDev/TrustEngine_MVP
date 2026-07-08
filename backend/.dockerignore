@@ -3,5 +3,5 @@ target
 .idea
 .vscode
 *.iml
-README.md
 logs
+README.md
